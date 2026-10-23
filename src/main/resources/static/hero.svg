@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f8a3c"/>
+      <stop offset="0.55" stop-color="#7fae52"/>
+      <stop offset="1" stop-color="#d9c27a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff6c8" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#fff6c8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#1f3a12" flood-opacity="0.35"/></filter>
+    <g id="arm">
+      <rect x="150" y="-44" width="520" height="88" rx="44" fill="#6a8fb4"/>
+      <rect x="150" y="-44" width="150" height="88" rx="30" fill="#000" opacity="0.07"/>
+      <rect x="60" y="-30" width="170" height="60" rx="30" fill="#e7b48f"/>
+      <ellipse cx="40" cy="0" rx="62" ry="40" fill="#efc3a1"/>
+      <rect x="-30" y="-30" width="34" height="14" rx="7" fill="#efc3a1"/>
+      <rect x="-40" y="-8" width="40" height="14" rx="7" fill="#efc3a1"/>
+      <rect x="-30" y="14" width="36" height="14" rx="7" fill="#efc3a1"/>
+    </g>
+  </defs>
+  <rect width="900" height="620" fill="url(#bg)"/>
+  <g filter="url(#soft)" opacity="0.7">
+    <circle cx="140" cy="120" r="90" fill="url(#glow)"/>
+    <circle cx="760" cy="90" r="120" fill="#c9e08a"/>
+    <circle cx="330" cy="520" r="110" fill="#3f7a31"/>
+    <circle cx="820" cy="470" r="100" fill="#e8d28b"/>
+    <circle cx="560" cy="40" r="70" fill="#2f6a2b"/>
+  </g>
+  <g transform="translate(450 330)" filter="url(#shadow)">
+    <g transform="rotate(-155)"><use href="#arm"/></g>
+    <g transform="rotate(-100)"><use href="#arm"/></g>
+    <g transform="rotate(-48)"><use href="#arm"/></g>
+    <g transform="rotate(10)"><use href="#arm"/></g>
+    <g transform="rotate(75)"><use href="#arm"/></g>
+    <g transform="rotate(128)"><use href="#arm"/></g>
+  </g>
+</svg>

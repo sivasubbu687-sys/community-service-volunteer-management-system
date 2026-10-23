@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Volunteer Management System</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="volunteer.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="staff-init.js"></script>
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body>
+
+  <!-- ===================== ADMIN / COORDINATOR SHELL (sidebar + top bar) ===================== -->
+  <aside id="sidebar" class="sidebar" data-roles="ADMIN,COORDINATOR" aria-label="Main menu">
+    <div class="side-brand">
+      <img src="cvms-logo-white.svg" alt="CVMS logo" width="44" height="44">
+      <div><strong>CVMS</strong><span>Community Volunteer<br>Management System</span></div>
+    </div>
+    <nav class="side-nav">
+      <button class="nav-btn side-btn active" data-view="dashboard"><svg class="side-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Dashboard</button>
+      <button class="nav-btn side-btn" data-view="directory"><svg class="side-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.2A5.5 5.5 0 0 1 21.5 20"/></svg>Volunteers</button>
+      <button class="nav-btn side-btn" data-view="register" data-roles="ADMIN"><svg class="side-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="8" r="4"/><path d="M3 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg>Register</button>
+      <button class="nav-btn side-btn" data-view="events"><svg class="side-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>Events</button>
+      <button class="nav-btn side-btn" data-view="assignments"><svg class="side-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l2 2 4-4"/><rect x="4" y="4" width="16" height="17" rx="2"/></svg>Assignments</button>
+      <button class="nav-btn side-btn" data-view="attendance"><svg class="side-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>Attendance</button>
+      <button class="nav-btn side-btn" data-view="users" data-roles="ADMIN"><svg class="side-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17a3.5 3.5 0 0 1 7 0M14.5 10h4M14.5 14h4"/></svg>Users</button>
+      <button class="nav-btn side-btn" id="side-settings" type="button" data-view="settings" data-roles="ADMIN"><svg class="side-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
+    </nav>
+    <p class="side-motto">Together<br>We Build<br>Stronger Communities</p>
+    <img class="side-mark" src="cvms-logo-white.svg" alt="" aria-hidden="true">
+  </aside>
+  <div id="side-backdrop" class="side-backdrop hidden"></div>
+
+  <header id="admin-topbar" class="admin-topbar" data-roles="ADMIN,COORDINATOR">
+    <button class="menu-btn" id="menu-btn" type="button" aria-label="Open menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <form class="top-search" id="top-search-form" role="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="top-search" placeholder="Search volunteers, events…" aria-label="Search volunteers and events">
+    </form>
+    <button class="bell" id="bell-btn" type="button" aria-label="Notifications">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7.500 2 7.500H4S6 15 6 9zM10 20a2 2 0 0 0 4 0"/></svg>
+      <span class="bell-count hidden" id="bell-count">0</span>
+    </button>
+    <div class="top-user">
+      <span id="top-avatar"></span>
+      <div class="top-user-text"><strong id="top-name"></strong><small id="top-role"></small></div>
+      <button class="btn btn-outline btn-sm" id="top-logout" type="button">Logout</button>
+    </div>
+  </header>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-badge"><img src="logo.png" alt="Community Volunteer Management System logo"></span>
+        <span class="brand-name">Community Volunteer Management System</span>
+      </div>
+      <div class="user-box">
+        <div class="user-info">
+          <span id="header-avatar"></span>
+          <span class="user-name" id="user-name"></span>
+          <span class="role-chip" id="user-role"></span>
+        </div>
+        <button class="btn btn-outline btn-sm logout-btn" id="pw-btn" data-roles="ADMIN">Change password</button>
+        <button class="btn btn-outline btn-sm logout-btn" id="logout-btn">Logout</button>
+      </div>
+      <nav class="nav">
+        <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+        <button class="nav-btn" data-view="profile" data-roles="VOLUNTEER">My Profile</button>
+        <button class="nav-btn" data-view="register" data-roles="ADMIN">Register</button>
+        <button class="nav-btn" data-view="directory" data-roles="ADMIN,COORDINATOR">Directory</button>
+        <button class="nav-btn" data-view="events">Events</button>
+        <button class="nav-btn" data-view="assignments" data-roles="ADMIN,COORDINATOR">Assignments</button>
+        <button class="nav-btn" data-view="attendance" data-roles="ADMIN,COORDINATOR">Attendance</button>
+        <button class="nav-btn" data-view="users" data-roles="ADMIN">Users</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===================== VOLUNTEER SITE (shown only to volunteers) ===================== -->
+  <div id="volunteer-site" class="v-site hidden">
+    <header id="volunteer-nav" class="v-nav hidden">
+      <button class="v-brand" type="button" data-target="v-hero" aria-label="Home">
+        <span class="v-brand-badge"><img src="logo.png" alt="CVMS logo"></span>
+        <span class="v-brand-text"><strong>CVMS</strong><small>Community Volunteer Management System</small></span>
+      </button>
+      <nav class="v-links" aria-label="Main">
+        <button class="v-link active" data-target="v-hero" type="button">Home</button>
+        <button class="v-link" data-target="v-why" type="button">About</button>
+        <button class="v-link" data-target="v-events" type="button">Events</button>
+        <button class="v-link" data-target="v-impact" type="button">Impact</button>
+        <button class="v-link" data-target="v-footer" type="button">Contact</button>
+      </nav>
+      <div class="v-actions">
+        <button class="v-user" data-vview="profile" type="button" aria-label="My Profile" title="My Profile"><span id="v-nav-avatar"></span></button>
+        <button class="v-btn v-btn-fill" id="v-logout" type="button">Logout</button>
+      </div>
+    </header>
+
+    <div id="volunteer-home">
+      <!-- hero -->
+      <section id="v-hero" class="v-hero">
+        <div class="v-hero-text">
+          <span class="v-greeting" id="v-greeting"></span>
+          <p class="v-eyebrow">Together for a Better Tomorrow</p>
+          <h1>Small Actions.<br>Big Impact.</h1>
+          <p class="v-lead">Join our community of volunteers and help build a cleaner, greener and kinder society. Your time, skills and support create lasting change.</p>
+          <div class="v-hero-buttons">
+            <button class="v-btn v-btn-fill" data-target="v-events" type="button">Get Started <svg class="v-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+            <button class="v-btn v-btn-line" data-target="v-why" type="button">Learn More</button>
+          </div>
+        </div>
+        <div class="v-hero-art" role="img" aria-label="Volunteers joining hands">
+          <div class="v-script-badge">Real People<br>Real Change</div>
+        </div>
+      </section>
+
+      <!-- impact numbers -->
+      <section id="v-impact" class="v-stats-wrap" aria-label="Our impact">
+        <div class="v-stats">
+          <div class="v-stat"><span class="v-stat-icon"><svg class="v-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><div><div class="v-stat-num" id="vs-volunteers">–</div><div class="v-stat-label">Active Volunteers</div></div></div>
+          <div class="v-stat"><span class="v-stat-icon"><svg class="v-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><div><div class="v-stat-num" id="vs-events">–</div><div class="v-stat-label">Community Events</div></div></div>
+          <div class="v-stat"><span class="v-stat-icon"><svg class="v-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg></span><div><div class="v-stat-num" id="vs-hours">–</div><div class="v-stat-label">Hours Contributed</div></div></div>
+          <div class="v-stat"><span class="v-stat-icon"><svg class="v-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></span><div><div class="v-stat-num" id="vs-shifts">–</div><div class="v-stat-label">Shifts Completed</div></div></div>
+        </div>
+      </section>
+
+      <!-- upcoming events -->
+      <section id="v-events" class="v-section">
+        <div class="v-section-head">
+          <h2>Upcoming Events</h2>
+          <button class="v-viewall" data-vview="events" type="button">View All →</button>
+        </div>
+        <div class="v-cards" id="v-cards"></div>
+      </section>
+
+      <!-- why volunteer -->
+      <section id="v-why" class="v-why">
+        <h2>Why Volunteer With Us?</h2>
+        <div class="v-why-grid">
+          <div class="v-why-item"><svg class="v-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 20A7 7 0 019.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg><div><h4>Make a Real Difference</h4><p>Help create a healthier, cleaner and safer community.</p></div></div>
+          <div class="v-why-item"><svg class="v-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><div><h4>Build New Connections</h4><p>Meet like-minded people and grow your network.</p></div></div>
+          <div class="v-why-item"><svg class="v-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><div><h4>Gain Valuable Experience</h4><p>Develop your skills and boost your resume.</p></div></div>
+          <div class="v-why-item"><svg class="v-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><div><h4>Be Part of Something Bigger</h4><p>Together we can create lasting change.</p></div></div>
+        </div>
+      </section>
+
+      <!-- kindness banner -->
+      <div class="v-banner">
+        <img src="community.svg" alt="Illustration of volunteers planting saplings and helping each other in a green park with a city skyline behind">
+        <div class="v-banner-text">Kindness builds<br>stronger<br>communities <span aria-hidden="true">♡</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="v-toast" class="v-toast hidden" role="status"></div>
+
+  <main class="container">
+
+    <!-- Messages (success / error) -->
+    <div id="message" class="message hidden" role="alert"></div>
+
+    <!-- DASHBOARD -->
+    <section id="view-dashboard" class="view">
+      <div id="admin-dashboard" class="adm" data-roles="ADMIN,COORDINATOR">
+        <div class="adm-main">
+          <section class="adm-banner">
+            <div>
+              <p>Welcome back,</p>
+              <h1><span id="adm-name"></span> <span aria-hidden="true">👋</span></h1>
+              <small>Make a difference. Support communities. Build a better tomorrow.</small>
+            </div>
+          </section>
+
+          <section class="adm-stats">
+            <article class="adm-stat"><span class="stat-ico c-blue"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.2A5.5 5.5 0 0 1 21.5 20"/></svg></span><div><span>Total Volunteers</span><strong id="adm-vol">–</strong><small id="adm-vol-sub">&nbsp;</small></div></article>
+            <article class="adm-stat"><span class="stat-ico c-green"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg></span><div><span>Total Events</span><strong id="adm-events">–</strong><small id="adm-events-sub">&nbsp;</small></div></article>
+            <article class="adm-stat"><span class="stat-ico c-purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg></span><div><span>Hours Contributed</span><strong id="adm-hours">–</strong><small id="adm-hours-sub">&nbsp;</small></div></article>
+            <article class="adm-stat"><span class="stat-ico c-orange"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M8 3v4M16 3v4M3.5 10h17M8 14h3"/></svg></span><div><span>Upcoming Events</span><strong id="adm-upcoming">–</strong><small id="adm-upcoming-sub">&nbsp;</small></div></article>
+          </section>
+
+          <section class="adm-charts">
+            <article class="adm-card">
+              <header><h3><span class="h-ico c-blue-soft"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span>Events Overview</h3><span class="chip">Last 6 months</span></header>
+              <div class="legend"><span><i class="dot dot-blue"></i>Events</span><span><i class="dot dot-green"></i>Volunteers assigned</span></div>
+              <div id="bar-chart" class="bar-chart" role="img" aria-label="Events and assigned volunteers per month"></div>
+            </article>
+            <article class="adm-card">
+              <header><h3><span class="h-ico c-blue-soft"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/></svg></span>Event Categories</h3></header>
+              <div class="donut-wrap">
+                <div id="donut" class="donut" role="img" aria-label="Events by category"></div>
+                <ul id="donut-legend" class="donut-legend"></ul>
+              </div>
+            </article>
+          </section>
+
+          <section class="adm-lists">
+            <article class="adm-card">
+              <header><h3><span class="h-ico c-blue-soft"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></span>Recent Events</h3><button class="link-btn" data-view="events" type="button">View All →</button></header>
+              <div class="table-wrap">
+                <table class="adm-table">
+                  <thead><tr><th>Event Name</th><th>Category</th><th>Location</th><th>Date</th><th>Status</th></tr></thead>
+                  <tbody id="adm-recent-events"></tbody>
+                </table>
+              </div>
+              <p id="adm-recent-empty" class="muted hidden">No events yet. Use “Add New Event” to create the first one.</p>
+            </article>
+            <article class="adm-card">
+              <header><h3>Recent Activities</h3><button class="link-btn" data-view="assignments" type="button">View All →</button></header>
+              <ul id="adm-activities" class="activity-list"></ul>
+              <p id="adm-act-empty" class="muted hidden">Nothing has happened yet.</p>
+            </article>
+          </section>
+        </div>
+
+        <aside class="adm-side">
+          <article class="adm-card">
+            <header><h3><span class="h-ico c-blue-soft"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span>Quick Actions</h3></header>
+            <div class="quick">
+              <button type="button" class="quick-btn" id="qa-event"><span class="q-ico c-blue"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>Add New Event</button>
+              <button type="button" class="quick-btn" id="qa-register" data-roles="ADMIN"><span class="q-ico c-green"><svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg></span>Register Volunteer</button>
+              <button type="button" class="quick-btn" id="qa-assign"><span class="q-ico c-purple"><svg viewBox="0 0 24 24"><path d="M9 11l2 2 4-4"/><rect x="4" y="4" width="16" height="17" rx="2"/></svg></span>Assign Volunteers</button>
+              <button type="button" class="quick-btn" id="qa-attendance"><span class="q-ico c-orange"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.500"/><path d="M12 7v5l3 2"/></svg></span>Record Attendance</button>
+              <button type="button" class="quick-btn" id="qa-report"><span class="q-ico c-teal"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h6M9 17h6"/></svg></span>Generate Report</button>
+            </div>
+          </article>
+
+          <article class="adm-card" id="adm-notifications">
+            <header><h3><span class="h-ico c-blue-soft"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7.5 2 7.5H4S6 15 6 9zM10 20a2 2 0 0 0 4 0"/></svg></span>Notifications <span class="count-badge hidden" id="adm-notif-count">0</span></h3><button class="link-btn" data-view="events" type="button">View All →</button></header>
+            <ul id="adm-notif-list" class="notif-list"></ul>
+            <p id="adm-notif-empty" class="muted hidden">You are all caught up.</p>
+          </article>
+
+          <article class="adm-card top-card">
+            <header><h3><span class="h-ico c-blue-soft"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></svg></span>Top Volunteers</h3></header>
+            <p class="muted">Ranked by total hours worked.</p>
+            <div id="top-empty" class="empty hidden"></div>
+            <ol id="top-list" class="top-list"></ol>
+          </article>
+
+          <article class="adm-change">
+            <h3>Community<br>Creates Change</h3>
+            <p>Your support helps build a better tomorrow.</p>
+            <button type="button" class="change-go" data-view="events" aria-label="Open events">→</button>
+          </article>
+        </aside>
+      </div>
+
+      <!-- Old dashboard markup: kept (hidden) because the older scripts still fill these elements -->
+      <div id="legacy-dashboard" class="hidden">
+        <div class="hero hero-morning" id="hero">
+          <div class="hero-text">
+            <span class="hero-date" id="greeting-date"></span>
+            <h1 id="greeting"><span id="greeting-text"></span> <span class="hero-name" id="greeting-name"></span></h1>
+            <p id="greeting-sub"></p>
+            <p class="hero-tip" id="greeting-tip"></p>
+          </div>
+          <div class="hero-icon" id="greeting-icon" aria-hidden="true"></div>
+        </div>
+        <div class="cards">
+          <div class="card stat"><div class="stat-value" id="stat-total">–</div></div>
+          <div class="card stat"><div class="stat-value" id="stat-events">–</div></div>
+          <div class="card stat" data-roles="VOLUNTEER"><div class="stat-value" id="stat-myhours">–</div></div>
+          <div class="card stat" data-roles="VOLUNTEER"><div class="stat-value" id="stat-myevents">–</div></div>
+          <div class="card stat"><div class="stat-text" id="stat-latest">–</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REGISTER / EDIT -->
+    <section id="view-register" class="view hidden" data-roles="ADMIN">
+      <div class="card form-card">
+        <h2 id="form-title">Register a Volunteer</h2>
+        <form id="volunteer-form" novalidate>
+          <input type="hidden" id="volunteer-id">
+
+          <div class="field">
+            <label for="name">Full name</label>
+            <input type="text" id="name" placeholder="e.g. Jane Doe" autocomplete="name">
+            <small class="error-text" id="name-error"></small>
+          </div>
+
+          <div class="field">
+            <label for="email">Email address</label>
+            <input type="email" id="email" placeholder="e.g. jane@example.com" autocomplete="email">
+            <small class="error-text" id="email-error"></small>
+          </div>
+
+          <div class="field">
+            <label for="phone">Phone number</label>
+            <input type="tel" id="phone" placeholder="e.g. +1 555 123 4567" autocomplete="tel">
+            <small class="error-text" id="phone-error"></small>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="submit-btn">Register Volunteer</button>
+            <button type="button" class="btn btn-outline hidden" id="cancel-btn">Cancel edit</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- DIRECTORY -->
+    <section id="view-directory" class="view hidden" data-roles="ADMIN,COORDINATOR">
+      <div class="card">
+        <div class="toolbar">
+          <h2>Volunteer Directory</h2>
+          <div class="toolbar-controls">
+            <input type="search" id="search" placeholder="Search name, email or phone…">
+            <button class="btn btn-outline" id="refresh-btn">⟳ Refresh</button>
+            <button class="btn btn-primary" id="pdf-volunteers-btn" data-roles="ADMIN,COORDINATOR">⬇ Download PDF</button>
+          </div>
+        </div>
+
+        <div id="loading" class="loading hidden"><span class="spinner"></span> Loading volunteers…</div>
+        <div id="empty" class="empty hidden"></div>
+
+        <div class="table-wrap">
+          <table id="volunteer-table" class="hidden">
+            <thead>
+              <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th class="actions-col" data-roles="ADMIN">Actions</th></tr>
+            </thead>
+            <tbody id="volunteer-body"></tbody>
+          </table>
+        </div>
+        <div id="volunteer-pager" class="pager hidden"></div>
+      </div>
+    </section>
+
+    <!-- EVENTS -->
+    <section id="view-events" class="view hidden">
+      <div class="card form-card event-form-card" data-roles="ADMIN,COORDINATOR">
+        <h2 id="event-form-title">Create an Event</h2>
+        <form id="event-form" novalidate>
+          <input type="hidden" id="event-id">
+
+          <div class="field">
+            <label for="event-title">Title</label>
+            <input type="text" id="event-title" placeholder="e.g. Beach Clean-up">
+            <small class="error-text" id="event-title-error"></small>
+          </div>
+
+          <div class="field">
+            <label for="event-description">Description</label>
+            <textarea id="event-description" rows="3" placeholder="What will volunteers do?"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="event-category">Category</label>
+            <select id="event-category">
+              <option value="">No category</option>
+            </select>
+            <small class="muted" data-roles="ADMIN">Categories are managed in Settings.</small>
+          </div>
+
+          <div class="field event-photo-field">
+            <label for="event-photo">Event photo (optional)</label>
+            <div class="photo-box">
+              <span id="event-photo-preview"></span>
+              <div class="photo-actions">
+                <input type="file" id="event-photo" accept="image/png,image/jpeg,image/gif,image/webp">
+                <button type="button" class="btn btn-outline btn-sm hidden" id="event-photo-remove">Remove current photo</button>
+                <small>JPG, PNG, GIF or WebP. Everyone sees it next to the event.</small>
+              </div>
+            </div>
+            <small class="error-text" id="event-photo-error"></small>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="event-date">Date</label>
+              <input type="date" id="event-date">
+              <small class="error-text" id="event-date-error"></small>
+            </div>
+            <div class="field">
+              <label for="event-start">Start time</label>
+              <input type="time" id="event-start">
+              <small class="error-text" id="event-start-error"></small>
+            </div>
+            <div class="field">
+              <label for="event-end">End time</label>
+              <input type="time" id="event-end">
+              <small class="error-text" id="event-end-error"></small>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="event-location">Location</label>
+            <input type="text" id="event-location" placeholder="e.g. Marina Beach">
+            <small class="error-text" id="event-location-error"></small>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="event-required">Required volunteers</label>
+              <input type="number" id="event-required" min="1" step="1" placeholder="e.g. 10">
+              <small class="error-text" id="event-required-error"></small>
+            </div>
+            <div class="field">
+              <label for="event-status">Status</label>
+              <select id="event-status">
+                <option value="UPCOMING">Upcoming</option>
+                <option value="ONGOING">Ongoing</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="CANCELLED">Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="event-submit-btn">Create Event</button>
+            <button type="button" class="btn btn-outline hidden" id="event-cancel-btn">Cancel edit</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card events-list">
+        <div class="toolbar">
+          <h2>All Events</h2>
+          <div class="toolbar-controls">
+            <input type="search" id="event-search" placeholder="Search by title…">
+            <select id="event-filter">
+              <option value="">All statuses</option>
+              <option value="UPCOMING">Upcoming</option>
+              <option value="ONGOING">Ongoing</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+            <button class="btn btn-outline" id="event-refresh-btn">⟳ Refresh</button>
+            <button class="btn btn-primary" id="pdf-events-btn" data-roles="ADMIN,COORDINATOR">⬇ Download PDF</button>
+          </div>
+        </div>
+
+        <div id="event-loading" class="loading hidden"><span class="spinner"></span> Loading events…</div>
+        <div id="event-empty" class="empty hidden"></div>
+
+        <div class="table-wrap">
+          <table id="event-table" class="hidden">
+            <thead>
+              <tr><th>Title</th><th>Date</th><th>Time</th><th>Location</th><th id="event-count-header">Assigned / Required</th><th>Status</th><th class="actions-col" data-roles="ADMIN,COORDINATOR">Actions</th><th class="actions-col" data-roles="VOLUNTEER">My participation</th></tr>
+            </thead>
+            <tbody id="event-body"></tbody>
+          </table>
+        </div>
+        <div id="event-pager" class="pager hidden"></div>
+      </div>
+    </section>
+
+    <!-- ASSIGNMENTS -->
+    <section id="view-assignments" class="view hidden" data-roles="ADMIN,COORDINATOR">
+      <div class="card event-form-card">
+        <h2>Assign Volunteers to an Event</h2>
+
+        <div class="field">
+          <label for="assign-event">Event</label>
+          <select id="assign-event"></select>
+        </div>
+
+        <div id="assign-summary" class="assign-summary hidden"></div>
+
+        <div id="assign-add" class="assign-add hidden">
+          <div class="field">
+            <label for="assign-volunteer">Add a volunteer</label>
+            <select id="assign-volunteer"></select>
+          </div>
+          <button class="btn btn-primary" id="assign-btn">+ Assign</button>
+        </div>
+      </div>
+
+      <div class="card events-list">
+        <div class="toolbar">
+          <h2>Assigned Volunteers</h2>
+          <div class="toolbar-controls">
+            <button class="btn btn-outline" id="assign-refresh-btn">⟳ Refresh</button>
+          </div>
+        </div>
+
+        <div id="assign-loading" class="loading hidden"><span class="spinner"></span> Loading assignments…</div>
+        <div id="assign-empty" class="empty hidden"></div>
+
+        <div class="table-wrap">
+          <table id="assign-table" class="hidden">
+            <thead>
+              <tr><th>Volunteer</th><th>Email</th><th>Phone</th><th>Status</th><th class="actions-col wide">Actions</th></tr>
+            </thead>
+            <tbody id="assign-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ATTENDANCE -->
+    <section id="view-attendance" class="view hidden" data-roles="ADMIN,COORDINATOR">
+      <div class="card event-form-card">
+        <h2>Event Attendance</h2>
+        <div class="field">
+          <label for="att-event">Event</label>
+          <select id="att-event"></select>
+        </div>
+        <div id="att-summary" class="assign-summary hidden"></div>
+      </div>
+
+      <div class="card events-list">
+        <div class="toolbar">
+          <h2>Volunteers</h2>
+          <div class="toolbar-controls">
+            <button class="btn btn-outline" id="att-refresh-btn">⟳ Refresh</button>
+          </div>
+        </div>
+
+        <div id="att-loading" class="loading hidden"><span class="spinner"></span> Loading attendance…</div>
+        <div id="att-empty" class="empty hidden"></div>
+
+        <div class="table-wrap">
+          <table id="att-table" class="hidden">
+            <thead>
+              <tr><th>Volunteer</th><th>Check-in</th><th>Check-out</th><th>Hours</th><th>Status</th><th class="actions-col wide">Actions</th></tr>
+            </thead>
+            <tbody id="att-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card events-list">
+        <div class="toolbar">
+          <h2>Volunteer Hours</h2>
+        </div>
+        <div class="field">
+          <label for="hours-volunteer">Volunteer</label>
+          <select id="hours-volunteer"></select>
+        </div>
+        <div id="hours-summary" class="assign-summary hidden"></div>
+        <div id="hours-empty" class="empty hidden"></div>
+        <div class="table-wrap">
+          <table id="hours-table" class="hidden">
+            <thead>
+              <tr><th>Event</th><th>Date</th><th>Attendance</th><th>Hours</th></tr>
+            </thead>
+            <tbody id="hours-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- MY PROFILE (volunteers) -->
+    <section id="view-profile" class="view hidden" data-roles="VOLUNTEER">
+      <div class="card form-card event-form-card">
+        <h2>My Profile</h2>
+
+        <div class="photo-box">
+          <span id="profile-avatar"></span>
+          <div class="photo-actions">
+            <input type="file" id="photo-input" accept="image/png,image/jpeg,image/gif,image/webp" class="hidden">
+            <button type="button" class="btn btn-primary btn-sm" id="photo-btn">Add photo</button>
+            <button type="button" class="btn btn-outline btn-sm hidden" id="photo-remove">Remove photo</button>
+            <small>JPG, PNG, GIF or WebP. It is shown everywhere your name appears.</small>
+          </div>
+        </div>
+
+        <form id="profile-form" novalidate>
+          <div class="field">
+            <label for="profile-name">Full name</label>
+            <input type="text" id="profile-name">
+            <small class="error-text" id="profile-name-error"></small>
+          </div>
+          <div class="field">
+            <label for="profile-email">Email address</label>
+            <input type="email" id="profile-email">
+            <small class="error-text" id="profile-email-error"></small>
+          </div>
+          <div class="field">
+            <label for="profile-phone">Phone number</label>
+            <input type="tel" id="profile-phone">
+            <small class="error-text" id="profile-phone-error"></small>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="profile-save-btn">Save Changes</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card events-list">
+        <div class="toolbar">
+          <h2>My Events &amp; Hours</h2>
+          <div class="toolbar-controls">
+            <button class="btn btn-outline" id="my-refresh-btn">⟳ Refresh</button>
+          </div>
+        </div>
+        <div id="my-summary" class="assign-summary hidden"></div>
+        <div id="my-empty" class="empty hidden"></div>
+        <div class="table-wrap">
+          <table id="my-table" class="hidden">
+            <thead>
+              <tr><th>Event</th><th>Date</th><th>Time</th><th>Location</th><th>Assignment</th><th>Attendance</th><th>Hours</th></tr>
+            </thead>
+            <tbody id="my-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS (admin) -->
+    <section id="view-settings" class="view hidden" data-roles="ADMIN">
+      <div class="card form-card event-form-card">
+        <h2>Event Categories</h2>
+        <p class="muted">These are the choices shown in the Category dropdown when an admin or coordinator creates or edits an event. The colour is used for the category in the dashboard chart.</p>
+        <form id="category-form" class="category-add" novalidate>
+          <input type="color" id="category-color" value="#2F6FED" title="Chart colour" aria-label="Chart colour">
+          <input type="text" id="category-name" maxlength="60" placeholder="New category name" aria-label="New category name">
+          <button type="submit" class="btn btn-primary" id="category-add-btn">Add</button>
+        </form>
+        <ul id="category-list" class="category-list"></ul>
+      </div>
+      <div class="card form-card event-form-card">
+        <h2>Account</h2>
+        <button type="button" class="btn" id="settings-pw-btn">Change password</button>
+      </div>
+    </section>
+
+    <!-- USERS (admin) -->
+    <section id="view-users" class="view hidden" data-roles="ADMIN">
+      <div class="card form-card event-form-card">
+        <h2>Create a User</h2>
+        <form id="user-form" novalidate>
+          <div class="field-row">
+            <div class="field">
+              <label for="user-new-name">Name</label>
+              <input type="text" id="user-new-name">
+            </div>
+            <div class="field">
+              <label for="user-new-email">Email</label>
+              <input type="email" id="user-new-email">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="user-new-password">Password (min 6 characters)</label>
+              <input type="password" id="user-new-password" autocomplete="new-password">
+            </div>
+            <div class="field">
+              <label for="user-new-role">Role</label>
+              <select id="user-new-role">
+                <option value="COORDINATOR">Coordinator</option>
+                <option value="ADMIN">Admin</option>
+                <option value="VOLUNTEER">Volunteer</option>
+              </select>
+            </div>
+          </div>
+          <div class="field hidden" id="user-volunteer-field">
+            <label for="user-new-volunteer">Link to volunteer record</label>
+            <select id="user-new-volunteer"></select>
+          </div>
+          <small class="error-text" id="user-form-error"></small>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="user-create-btn">Create User</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card events-list">
+        <div class="toolbar">
+          <h2>All Users</h2>
+          <div class="toolbar-controls">
+            <button class="btn btn-outline" id="users-refresh-btn">⟳ Refresh</button>
+          </div>
+        </div>
+        <div id="users-loading" class="loading hidden"><span class="spinner"></span> Loading users…</div>
+        <div id="users-empty" class="empty hidden"></div>
+        <div class="table-wrap">
+          <table id="users-table" class="hidden">
+            <thead>
+              <tr><th>Name</th><th>Email</th><th>Role</th><th>Volunteer ID</th><th class="actions-col">Actions</th></tr>
+            </thead>
+            <tbody id="users-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <footer id="v-footer" class="v-footer hidden">
+    <div class="v-footer-row">
+      <div class="v-footer-brand">
+        <span class="v-brand-badge"><img src="logo.png" alt="CVMS community volunteering logo"></span>
+        <div class="v-footer-brand-text">
+          <strong>CVMS</strong>
+          <span>Community Volunteer Management System</span>
+          <em>Together we can make a difference.</em>
+        </div>
+      </div>
+      <div class="v-social">
+        <a class="v-social-icon" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg class="v-social-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
+        <a class="v-social-icon" href="https://www.instagram.com/siva__2020/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg class="v-social-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="#fff"/></svg></a>
+        <a class="v-social-icon" href="https://www.linkedin.com/in/siva-subrahmanyeswararao-bolligarla-9358a039b" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><svg class="v-social-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+        <a class="v-social-icon" href="mailto:sivasubbu687@gmail.com" aria-label="Email"><svg class="v-social-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a>
+      </div>
+    </div>
+    <p class="v-copy">© <span id="v-year"></span> CVMS. Together for a better tomorrow.</p>
+  </footer>
+
+  <!-- Change password dialog -->
+  <div id="pw-overlay" class="overlay hidden">
+    <div class="dialog">
+      <h3>Change password</h3>
+      <div class="field">
+        <label for="pw-current">Current password</label>
+        <input type="password" id="pw-current" autocomplete="current-password">
+      </div>
+      <div class="field">
+        <label for="pw-new">New password (min 8 characters)</label>
+        <input type="password" id="pw-new" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label for="pw-confirm">Repeat new password</label>
+        <input type="password" id="pw-confirm" autocomplete="new-password">
+      </div>
+      <small class="error-text" id="pw-error"></small>
+      <div class="dialog-actions">
+        <button class="btn btn-outline" id="pw-cancel">Cancel</button>
+        <button class="btn btn-primary" id="pw-save">Change password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Correct check-in / check-out times (admin, coordinator) -->
+  <div id="times-overlay" class="overlay hidden">
+    <div class="dialog">
+      <h3>Correct attendance times</h3>
+      <p id="times-text"></p>
+      <div class="field">
+        <label for="times-in">Check-in time</label>
+        <input type="datetime-local" id="times-in">
+      </div>
+      <div class="field">
+        <label for="times-out">Check-out time</label>
+        <input type="datetime-local" id="times-out">
+      </div>
+      <small class="error-text" id="times-error"></small>
+      <div class="dialog-actions">
+        <button class="btn btn-outline" id="times-cancel">Cancel</button>
+        <button class="btn btn-primary" id="times-save">Save times</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- "Create a login?" dialog (admin) -->
+  <div id="login-overlay" class="overlay hidden">
+    <div class="dialog">
+      <h3>Create a login for this volunteer?</h3>
+      <p id="login-text"></p>
+      <div class="field">
+        <label for="login-password">Password for the login (min 6 characters)</label>
+        <input type="password" id="login-password" autocomplete="new-password">
+        <small class="error-text" id="login-error"></small>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-outline" id="login-no">No, skip</button>
+        <button class="btn btn-primary" id="login-yes">Yes, create login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leave event dialog (volunteers give a reason, staff are notified) -->
+  <div id="leave-overlay" class="overlay hidden">
+    <div class="dialog">
+      <h3 id="leave-title">Leave event?</h3>
+      <p class="muted">Please tell the organisers why you are leaving. They will see your message in their notifications.</p>
+      <textarea id="leave-reason" rows="4" maxlength="500" placeholder="Reason for leaving" aria-label="Reason for leaving"></textarea>
+      <p id="leave-error" class="leave-error hidden"></p>
+      <div class="dialog-actions">
+        <button class="btn btn-outline" id="leave-no" type="button">Cancel</button>
+        <button class="btn btn-danger" id="leave-yes" type="button">Leave event</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete confirmation dialog -->
+  <div id="confirm-overlay" class="overlay hidden">
+    <div class="dialog">
+      <h3 id="confirm-title">Delete volunteer?</h3>
+      <p id="confirm-text"></p>
+      <div class="dialog-actions">
+        <button class="btn btn-outline" id="confirm-no">Cancel</button>
+        <button class="btn btn-danger" id="confirm-yes">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">© <span id="footer-year"></span> CVMS – Community Volunteer Management System. All rights reserved.</footer>
+
+  <script src="password-toggle.js"></script>
+  <script src="volunteer-home.js"></script>
+  <script src="script.js"></script>
+  <script src="settings.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
