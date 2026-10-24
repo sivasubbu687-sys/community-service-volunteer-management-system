@@ -37,6 +37,11 @@ public class ExportController {
 		return pdf(pdfExportService.eventsPdf(search, status, user.name()), "events");
 	}
 
+	@GetMapping("/assignments/export/pdf")
+	public ResponseEntity<byte[]> attendancePdf(@AuthenticationPrincipal AuthUser user) {
+		return pdf(pdfExportService.attendancePdf(user.name()), "attendance");
+	}
+
 	private ResponseEntity<byte[]> pdf(byte[] bytes, String name) {
 		return ResponseEntity.ok()
 				.contentType(MediaType.APPLICATION_PDF)

@@ -104,7 +104,19 @@
   $("qa-register").addEventListener("click", () => showView("register"));
   $("qa-assign").addEventListener("click", () => showView("assignments"));
   $("qa-attendance").addEventListener("click", () => showView("attendance"));
-  $("qa-report").addEventListener("click", (event) => downloadPdf(event.currentTarget, EVENTS_URL + "/export/pdf?search=&status="));
+  // Generate Report: the user picks Volunteers, Events or Attendance first
+  const REPORT_URLS = {
+    volunteers: API_URL + "/export/pdf?search=",
+    events: EVENTS_URL + "/export/pdf?search=&status=",
+    attendance: ASSIGNMENTS_URL + "/export/pdf",
+  };
+  $("qa-report").addEventListener("click", () => $("report-overlay").classList.remove("hidden"));
+  $("report-no").addEventListener("click", () => $("report-overlay").classList.add("hidden"));
+  $("report-yes").addEventListener("click", async (event) => {
+    const type = document.querySelector('input[name="report-type"]:checked').value;
+    await downloadPdf(event.currentTarget, REPORT_URLS[type]);
+    $("report-overlay").classList.add("hidden");
+  });
 
   // =====================================================================
   // DASHBOARD
@@ -270,6 +282,7 @@
 
   // ----- notifications: volunteers leaving events (from the server) + ones worked out from events and volunteers -----
   let leaveNotices = [];
+  let notifAll = false;
   async function loadLeaveNotices() {
     try {
       leaveNotices = await api("/api/notices");
@@ -316,8 +329,8 @@
 
     const list = $("adm-notif-list");
     list.replaceChildren();
-    leaveNotices.slice(0, 5).forEach((n) => list.appendChild(notice(n)));
-    notes.slice(0, 3).forEach((n) => {
+    leaveNotices.slice(0, notifAll ? leaveNotices.length : 5).forEach((n) => list.appendChild(notice(n)));
+    notes.slice(0, notifAll ? notes.length : 3).forEach((n) => {
       const li = el("li");
       li.append(el("i", "n-dot " + n.color));
       const text = el("div");
@@ -326,12 +339,16 @@
       list.appendChild(li);
     });
     const total = notes.length + leaveNotices.length;
+    $("adm-notif-more").textContent = notifAll ? "Show less" : "View All →";
+    $("adm-notif-more").classList.toggle("hidden", total <= 3);
     $("adm-notif-empty").classList.toggle("hidden", total > 0);
     [$("adm-notif-count"), $("bell-count")].forEach((badge) => {
       badge.textContent = total;
       badge.classList.toggle("hidden", total === 0);
     });
   }
+
+  $("adm-notif-more").addEventListener("click", () => { notifAll = !notifAll; renderNotifications(); });
 
   window.renderAdminDashboard = function () {
     renderStats();

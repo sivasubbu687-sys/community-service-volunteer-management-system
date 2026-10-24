@@ -1,5 +1,6 @@
 package com.community.volunteer_management.service;
 
+import com.community.volunteer_management.entity.Assignment;
 import com.community.volunteer_management.entity.AssignmentStatus;
 import com.community.volunteer_management.entity.Event;
 import com.community.volunteer_management.entity.EventStatus;
@@ -9,6 +10,7 @@ import com.community.volunteer_management.repository.VolunteerRepository;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -122,6 +124,36 @@ public class PdfExportService {
 			}
 			document.add(table);
 			document.add(total(events.size() + (events.size() == 1 ? " event" : " events")));
+		});
+	}
+
+	// ---------- attendance ----------
+
+	@Transactional(readOnly = true)
+	public byte[] attendancePdf(String generatedBy) {
+		List<Assignment> rows = assignmentRepository.findAll().stream()
+				.filter(a -> a.getStatus() != AssignmentStatus.CANCELLED)
+				.sorted(Comparator.comparing((Assignment a) -> a.getEvent().getEventDate()).reversed()
+						.thenComparing(a -> a.getVolunteer().getName(), String.CASE_INSENSITIVE_ORDER))
+				.toList();
+		DateTimeFormatter clock = DateTimeFormatter.ofPattern("d MMM, HH:mm");
+		return build("Attendance Report", "All events", generatedBy, true, document -> {
+			PdfPTable table = newTable(new float[] { 3f, 2f, 2.6f, 2.6f, 1.4f, 1.6f });
+			header(table, "Volunteer", "Event", "Check-in", "Check-out", "Hours", "Attendance");
+			int row = 0;
+			double hours = 0;
+			for (Assignment a : rows) {
+				hours += a.getHoursWorked();
+				body(table, row++, a.getVolunteer().getName(),
+						a.getEvent().getTitle() + " (" + a.getEvent().getEventDate() + ")",
+						a.getCheckInTime() == null ? null : a.getCheckInTime().format(clock),
+						a.getCheckOutTime() == null ? null : a.getCheckOutTime().format(clock),
+						String.format(Locale.ROOT, "%.1f", a.getHoursWorked()),
+						a.getAttendanceStatus() == null ? null : label(a.getAttendanceStatus().name()));
+			}
+			document.add(table);
+			document.add(total(rows.size() + (rows.size() == 1 ? " record" : " records") + "  |  "
+					+ String.format(Locale.ROOT, "%.1f", hours) + " hours"));
 		});
 	}
 

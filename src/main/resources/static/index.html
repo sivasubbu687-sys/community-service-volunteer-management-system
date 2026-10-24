@@ -227,7 +227,7 @@
           </article>
 
           <article class="adm-card" id="adm-notifications">
-            <header><h3><span class="h-ico c-blue-soft"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7.5 2 7.5H4S6 15 6 9zM10 20a2 2 0 0 0 4 0"/></svg></span>Notifications <span class="count-badge hidden" id="adm-notif-count">0</span></h3><button class="link-btn" data-view="events" type="button">View All →</button></header>
+            <header><h3><span class="h-ico c-blue-soft"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7.5 2 7.5H4S6 15 6 9zM10 20a2 2 0 0 0 4 0"/></svg></span>Notifications <span class="count-badge hidden" id="adm-notif-count">0</span></h3><button class="link-btn" id="adm-notif-more" type="button">View All →</button></header>
             <ul id="adm-notif-list" class="notif-list"></ul>
             <p id="adm-notif-empty" class="muted hidden">You are all caught up.</p>
           </article>
@@ -239,11 +239,6 @@
             <ol id="top-list" class="top-list"></ol>
           </article>
 
-          <article class="adm-change">
-            <h3>Community<br>Creates Change</h3>
-            <p>Your support helps build a better tomorrow.</p>
-            <button type="button" class="change-go" data-view="events" aria-label="Open events">→</button>
-          </article>
         </aside>
       </div>
 
@@ -758,6 +753,23 @@
       <div class="dialog-actions">
         <button class="btn btn-outline" id="login-no">No, skip</button>
         <button class="btn btn-primary" id="login-yes">Yes, create login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generate report dialog (admin, coordinator) -->
+  <div id="report-overlay" class="overlay hidden">
+    <div class="dialog">
+      <h3>Generate Report</h3>
+      <p class="muted">Which report do you want to download as a PDF?</p>
+      <div class="report-options" role="radiogroup" aria-label="Report type">
+        <label class="report-option"><input type="radio" name="report-type" value="volunteers" checked> <span><strong>Volunteers</strong><small>Names, emails and phone numbers</small></span></label>
+        <label class="report-option"><input type="radio" name="report-type" value="events"> <span><strong>Events</strong><small>Schedule, location, category and status</small></span></label>
+        <label class="report-option"><input type="radio" name="report-type" value="attendance"> <span><strong>Attendance</strong><small>Check-in, check-out and hours per volunteer</small></span></label>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-outline" id="report-no" type="button">Cancel</button>
+        <button class="btn btn-primary" id="report-yes" type="button">Download PDF</button>
       </div>
     </div>
   </div>
