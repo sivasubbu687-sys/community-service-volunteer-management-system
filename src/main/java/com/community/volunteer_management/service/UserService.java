@@ -40,6 +40,9 @@ public class UserService {
 	}
 
 	public UserResponse create(CreateUserRequest request) {
+		if (request.role() == Role.ADMIN) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New users can only be Coordinators or Volunteers");
+		}
 		String email = request.email().trim().toLowerCase();
 		if (userRepository.existsByEmail(email)) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "A user with this email already exists");
