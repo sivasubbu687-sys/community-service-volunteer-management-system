@@ -57,6 +57,9 @@ public class EventService {
 		Event event = findById(id);
 		validateTimes(updatedEvent);
 		updatedEvent.setCategory(checkCategory(updatedEvent.getCategory()));
+		boolean rescheduled = !java.util.Objects.equals(event.getEventDate(), updatedEvent.getEventDate())
+				|| !java.util.Objects.equals(event.getStartTime(), updatedEvent.getStartTime())
+				|| !java.util.Objects.equals(event.getEndTime(), updatedEvent.getEndTime());
 		event.setTitle(updatedEvent.getTitle());
 		event.setDescription(updatedEvent.getDescription());
 		event.setEventDate(updatedEvent.getEventDate());
@@ -67,6 +70,11 @@ public class EventService {
 		event.setCategory(updatedEvent.getCategory());
 		if (updatedEvent.getStatus() != null) {
 			event.setStatus(updatedEvent.getStatus());
+		}
+		// Moving the date or time (for example fixing a wrong date) must not leave a stale status such as
+		// COMPLETED behind: work the status out again from the new schedule, unless the event is cancelled.
+		if (rescheduled && event.getStatus() != EventStatus.CANCELLED) {
+			event.setStatus(statusFor(event, LocalDateTime.now()));
 		}
 		return eventRepository.save(event);
 	}
@@ -97,6 +105,16 @@ public class EventService {
 				&& !event.getEndTime().isAfter(event.getStartTime())) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "End time must be after start time");
 		}
+	}
+
+	private EventStatus statusFor(Event event, LocalDateTime now) {
+		if (now.isAfter(LocalDateTime.of(event.getEventDate(), event.getEndTime()))) {
+			return EventStatus.COMPLETED;
+		}
+		if (!now.isBefore(LocalDateTime.of(event.getEventDate(), event.getStartTime()))) {
+			return EventStatus.ONGOING;
+		}
+		return EventStatus.UPCOMING;
 	}
 
 	// Moves events along automatically: UPCOMING -> ONGOING when the start time is reached,
