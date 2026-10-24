@@ -72,7 +72,7 @@ public class PdfExportService {
 				.toList();
 
 		String subtitle = term.isEmpty() ? "All volunteers" : "Search: \"" + search.trim() + "\"";
-		return build("Volunteer Directory", subtitle, generatedBy, false, document -> {
+		return build("Volunteer Data", subtitle, generatedBy, false, document -> {
 			PdfPTable table = newTable(new float[] { 1f, 3f, 4.5f, 2.5f });
 			header(table, "ID", "Name", "Email", "Phone");
 			int row = 0;
