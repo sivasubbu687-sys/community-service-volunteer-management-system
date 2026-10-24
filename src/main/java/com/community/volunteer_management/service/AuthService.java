@@ -44,7 +44,7 @@ public class AuthService {
 		Volunteer volunteer = new Volunteer();
 		volunteer.setName(request.name().trim());
 		volunteer.setEmail(email);
-		volunteer.setPhone(request.phone().trim());
+		volunteer.setPhone(PhoneRules.check(request.phone()));
 		volunteer = volunteerRepository.save(volunteer);
 
 		User user = new User();

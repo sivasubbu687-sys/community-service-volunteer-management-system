@@ -167,7 +167,7 @@ $("register-form").addEventListener("submit", async (event) => {
 
   if (name.length < 2) return showMessage("Please enter your full name.", "error");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showMessage("Please enter a valid email address.", "error");
-  if (!/^\+?[0-9\s\-()]{7,20}$/.test(phone)) return showMessage("Please enter a valid phone number (7–20 digits).", "error");
+  if (!/^[6-9][0-9]{9}$/.test(phone)) return showMessage("Phone number must be 10 digits and start with 6, 7, 8 or 9.", "error");
   if (password.length < 6) return showMessage("Password must be at least 6 characters.", "error");
   if (password !== confirm) return showMessage("The two passwords do not match.", "error");
 

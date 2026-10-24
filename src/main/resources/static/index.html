@@ -289,7 +289,7 @@
 
           <div class="field">
             <label for="phone">Phone number</label>
-            <input type="tel" id="phone" placeholder="e.g. +1 555 123 4567" autocomplete="tel">
+            <input type="tel" id="phone" placeholder="10-digit mobile, e.g. 9876543210" autocomplete="tel" maxlength="10" inputmode="numeric">
             <small class="error-text" id="phone-error"></small>
           </div>
 
@@ -571,7 +571,7 @@
           </div>
           <div class="field">
             <label for="profile-phone">Phone number</label>
-            <input type="tel" id="profile-phone">
+            <input type="tel" id="profile-phone" maxlength="10" inputmode="numeric">
             <small class="error-text" id="profile-phone-error"></small>
           </div>
           <div class="form-actions">

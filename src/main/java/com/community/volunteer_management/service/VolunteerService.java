@@ -41,6 +41,7 @@ public class VolunteerService {
 	}
 
 	public Volunteer create(Volunteer volunteer) {
+		volunteer.setPhone(PhoneRules.check(volunteer.getPhone()));
 		return volunteerRepository.save(volunteer);
 	}
 
@@ -48,7 +49,7 @@ public class VolunteerService {
 		Volunteer volunteer = findById(id);
 		volunteer.setName(updatedVolunteer.getName());
 		volunteer.setEmail(updatedVolunteer.getEmail());
-		volunteer.setPhone(updatedVolunteer.getPhone());
+		volunteer.setPhone(PhoneRules.check(updatedVolunteer.getPhone()));
 		return volunteerRepository.save(volunteer);
 	}
 

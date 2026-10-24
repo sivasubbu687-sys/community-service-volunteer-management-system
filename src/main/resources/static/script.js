@@ -272,7 +272,7 @@ function validate() {
 
   if (name.length < 2) errors.name = "Please enter the full name (at least 2 characters).";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Please enter a valid email address.";
-  if (!/^\+?[0-9\s\-()]{7,20}$/.test(phone)) errors.phone = "Please enter a valid phone number (7–20 digits).";
+  if (!/^[6-9][0-9]{9}$/.test(phone)) errors.phone = "Phone number must be 10 digits and start with 6, 7, 8 or 9.";
 
   Object.keys(fields).forEach((key) => {
     $(key + "-error").textContent = errors[key] || "";
@@ -1594,7 +1594,7 @@ $("profile-form").addEventListener("submit", async (event) => {
   const errors = {};
   if (name.length < 2) errors.name = "Please enter your full name.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Please enter a valid email address.";
-  if (!/^\+?[0-9\s\-()]{7,20}$/.test(phone)) errors.phone = "Please enter a valid phone number (7–20 digits).";
+  if (!/^[6-9][0-9]{9}$/.test(phone)) errors.phone = "Phone number must be 10 digits and start with 6, 7, 8 or 9.";
   ["name", "email", "phone"].forEach((key) => {
     $("profile-" + key + "-error").textContent = errors[key] || "";
   });
