@@ -130,7 +130,10 @@ public class EventService {
 			LocalDateTime end = LocalDateTime.of(event.getEventDate(), event.getEndTime());
 			EventStatus status = event.getStatus();
 			EventStatus updated = status;
-			if (status == EventStatus.UPCOMING || status == EventStatus.ONGOING) {
+			if ((status == EventStatus.COMPLETED || status == EventStatus.ONGOING) && now.isBefore(start)) {
+				// the date was moved to the future (for example a wrong date was corrected): it has not started yet
+				updated = EventStatus.UPCOMING;
+			} else if (status == EventStatus.UPCOMING || status == EventStatus.ONGOING) {
 				if (now.isAfter(end)) {
 					updated = EventStatus.COMPLETED;
 				} else if (status == EventStatus.UPCOMING && !now.isBefore(start)) {
