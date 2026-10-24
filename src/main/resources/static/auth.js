@@ -32,6 +32,26 @@ try {
   }
 } catch (e) { /* storage unavailable: stay on the login page */ }
 
+// ---------- Phone number: checked while typing ----------
+document.addEventListener("DOMContentLoaded", () => {
+  const input = document.getElementById("reg-phone");
+  if (!input) return;
+  const check = (finished) => {
+    const value = input.value;
+    let text = "";
+    if (value && !/^[6-9]/.test(value)) text = "Phone number must start with 6, 7, 8 or 9.";
+    else if (finished && value && value.length !== 10) text = "Phone number must be exactly 10 digits.";
+    if (text) showMessage(text, "error");
+    else if ($("auth-message").textContent.startsWith("Phone number")) hideMessage();
+  };
+  input.addEventListener("input", () => {
+    const digits = input.value.replace(/\D/g, "");
+    if (digits !== input.value) input.value = digits;
+    check(input.value.length === 10);
+  });
+  input.addEventListener("blur", () => check(true));
+});
+
 // ---------- Messages ----------
 function showMessage(text, type) {
   const box = $("auth-message");

@@ -325,6 +325,32 @@ Object.keys(fields).forEach((key) =>
   })
 );
 
+// Phone numbers are checked while typing: digits only, must start with 6-9, and be 10 digits long.
+// A wrong first digit is flagged immediately; the length is flagged once the user leaves the field.
+function phoneProblem(value, finished) {
+  if (!value) return finished ? "Phone number is required." : "";
+  if (!/^[6-9]/.test(value)) return "Phone number must start with 6, 7, 8 or 9.";
+  if (finished && value.length !== 10) return "Phone number must be exactly 10 digits.";
+  return "";
+}
+
+function watchPhone(inputId, errorId) {
+  const input = $(inputId);
+  const show = (finished) => {
+    const text = phoneProblem(input.value, finished);
+    $(errorId).textContent = text;
+    input.classList.toggle("invalid", Boolean(text));
+  };
+  input.addEventListener("input", () => {
+    const digits = input.value.replace(/\D/g, "");
+    if (digits !== input.value) input.value = digits;
+    show(input.value.length === 10);
+  });
+  input.addEventListener("blur", () => show(true));
+}
+watchPhone("phone", "phone-error");
+watchPhone("profile-phone", "profile-phone-error");
+
 // ---------- Edit ----------
 function startEdit(volunteer) {
   showView("register");
@@ -618,6 +644,17 @@ eventForm.addEventListener("submit", async (event) => {
 Object.keys(eventFieldIds).forEach((key) =>
   $(eventFieldIds[key]).addEventListener("input", () => setFieldError(key, ""))
 );
+
+// End time must be after start time: flagged as soon as both are filled in, not only when the form is submitted
+function checkEventTimes() {
+  const start = $("event-start").value;
+  const end = $("event-end").value;
+  setFieldError("end", start && end && end <= start ? "End time must be after start time." : "");
+}
+["event-start", "event-end"].forEach((id) => {
+  $(id).addEventListener("input", checkEventTimes);
+  $(id).addEventListener("change", checkEventTimes);
+});
 
 function startEditEvent(ev) {
   $("event-id").value = ev.id;
