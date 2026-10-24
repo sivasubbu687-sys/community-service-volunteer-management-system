@@ -13,6 +13,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -27,6 +32,16 @@ public class EmailService {
 	@Value("${spring.mail.username:}")
 	private String fromAddress;
 
+	// Optional: Brevo (HTTPS email API). Hosts such as Render's free plan block SMTP, so when this key is set
+	// mail goes out over HTTPS instead. MAIL_FROM must be a sender verified in Brevo (defaults to MAIL_USERNAME).
+	@Value("${app.mail.brevo-api-key:}")
+	private String brevoApiKey;
+
+	@Value("${app.mail.from:}")
+	private String brevoFrom;
+
+	private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+
 	public EmailService(JavaMailSender mailSender) {
 		this.mailSender = mailSender;
 	}
@@ -35,7 +50,7 @@ public class EmailService {
 	// Problems are only logged.
 	@Async
 	public void sendAssignmentEmail(Volunteer volunteer, Event event) {
-		if (fromAddress == null || fromAddress.isBlank()) {
+		if (!mailConfigured()) {
 			log.warn("Assignment email NOT sent to {}: mail is not configured (set MAIL_USERNAME and MAIL_PASSWORD).",
 					volunteer.getEmail());
 			return;
@@ -56,12 +71,7 @@ public class EmailService {
 		text.append("Community Volunteer Management System");
 
 		try {
-			SimpleMailMessage message = new SimpleMailMessage();
-			message.setFrom(fromAddress);
-			message.setTo(volunteer.getEmail());
-			message.setSubject("Volunteer assignment: " + event.getTitle());
-			message.setText(text.toString());
-			mailSender.send(message);
+			deliver(volunteer.getEmail(), "Volunteer assignment: " + event.getTitle(), text.toString(), null);
 			log.info("Assignment email sent to {}", volunteer.getEmail());
 		} catch (Exception e) {
 			log.error("Could not send assignment email to {}: {}", volunteer.getEmail(), e.getMessage());
@@ -72,7 +82,7 @@ public class EmailService {
 	// The link contains the secret token, so it is never written to the log.
 	@Async
 	public void sendPasswordResetEmail(String name, String toAddress, String link) {
-		if (fromAddress == null || fromAddress.isBlank()) {
+		if (!mailConfigured()) {
 			log.warn("Password reset email NOT sent to {}: mail is not configured (set MAIL_USERNAME and MAIL_PASSWORD).",
 					toAddress);
 			return;
@@ -102,16 +112,67 @@ public class EmailService {
 				+ "</div>";
 
 		try {
-			MimeMessage message = mailSender.createMimeMessage();
-			MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-			helper.setFrom(fromAddress);
-			helper.setTo(toAddress);
-			helper.setSubject("Reset your password");
-			helper.setText(plain, html);
-			mailSender.send(message);
+			deliver(toAddress, "Reset your password", plain, html);
 			log.info("Password reset email sent to {}", toAddress);
 		} catch (Exception e) {
 			log.error("Could not send password reset email to {}: {}", toAddress, e.getMessage());
 		}
+	}
+
+	private boolean mailConfigured() {
+		return !brevoApiKey.isBlank() || (fromAddress != null && !fromAddress.isBlank());
+	}
+
+	// Sends through Brevo when an API key is set, otherwise through SMTP. Throws on failure (callers log it).
+	private void deliver(String to, String subject, String plain, String html) throws Exception {
+		if (!brevoApiKey.isBlank()) {
+			String from = !brevoFrom.isBlank() ? brevoFrom : fromAddress;
+			String json = "{\"sender\":{\"name\":\"Community Volunteer Management System\",\"email\":" + quote(from) + "},"
+					+ "\"to\":[{\"email\":" + quote(to) + "}],\"subject\":" + quote(subject)
+					+ ",\"textContent\":" + quote(plain) + (html == null ? "" : ",\"htmlContent\":" + quote(html)) + "}";
+			HttpRequest request = HttpRequest.newBuilder(URI.create("https://api.brevo.com/v3/smtp/email"))
+					.timeout(Duration.ofSeconds(20))
+					.header("api-key", brevoApiKey)
+					.header("Content-Type", "application/json")
+					.POST(HttpRequest.BodyPublishers.ofString(json))
+					.build();
+			HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
+			if (response.statusCode() >= 300) {
+				throw new IllegalStateException("Brevo returned " + response.statusCode() + ": " + response.body());
+			}
+			return;
+		}
+		MimeMessage message = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+		helper.setFrom(fromAddress);
+		helper.setTo(to);
+		helper.setSubject(subject);
+		if (html == null) {
+			helper.setText(plain, false);
+		} else {
+			helper.setText(plain, html);
+		}
+		mailSender.send(message);
+	}
+
+	private static String quote(String value) {
+		StringBuilder sb = new StringBuilder("\"");
+		for (char c : value.toCharArray()) {
+			switch (c) {
+				case '"' -> sb.append("\\\"");
+				case '\\' -> sb.append("\\\\");
+				case '\n' -> sb.append("\\n");
+				case '\r' -> sb.append("\\r");
+				case '\t' -> sb.append("\\t");
+				default -> {
+					if (c < 0x20) {
+						sb.append(String.format("\\u%04x", (int) c));
+					} else {
+						sb.append(c);
+					}
+				}
+			}
+		}
+		return sb.append('"').toString();
 	}
 }
