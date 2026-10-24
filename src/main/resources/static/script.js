@@ -910,6 +910,11 @@ function isAttendanceOpened(ev) {
   return new Date() >= new Date(start.getTime() - EARLY_CHECK_IN_MINUTES * 60000);
 }
 
+// True once the event's start time has passed (absence and time corrections only make sense after that)
+function hasEventStarted(ev) {
+  return new Date() >= new Date(ev.eventDate + "T" + ev.startTime);
+}
+
 // True from 30 minutes before the start until the event ends (live check-in / check-out)
 function isEventWindowOpen(ev) {
   const end = new Date(ev.eventDate + "T" + ev.endTime);
@@ -969,9 +974,12 @@ async function loadAttendance() {
   badge.textContent = STATUS_LABELS[ev.status] || ev.status;
   const windowOpen = isEventWindowOpen(ev);
   const opened = isAttendanceOpened(ev);
+  const started = hasEventStarted(ev);
   const hint = document.createElement("span");
   hint.textContent = !opened
     ? "This event has not started yet. Attendance opens on " + ev.eventDate + " " + EARLY_CHECK_IN_MINUTES + " minutes before it starts (" + shortTime(ev.startTime) + ")."
+    : !started
+      ? "Check-in is open. Marking absent or editing times is available once the event starts (" + shortTime(ev.startTime) + ")."
     : windowOpen
       ? "Check-in / check-out is open now."
       : "Check-in / check-out is closed. You can still mark absence or correct times.";
@@ -1026,9 +1034,9 @@ async function loadAttendance() {
       const btn = document.createElement("button");
       btn.className = "btn btn-sm " + cls;
       btn.textContent = text;
-      if (!opened) {
+      if (needsWindow ? !opened : !started) {
         btn.disabled = true;
-        btn.title = "The event has not started yet";
+        btn.title = needsWindow ? "Check-in opens " + EARLY_CHECK_IN_MINUTES + " minutes before the event starts" : "The event has not started yet";
       } else if (needsWindow && !windowOpen) {
         btn.disabled = true;
         btn.title = "Check-in / check-out is only open from " + EARLY_CHECK_IN_MINUTES + " minutes before the start until the event ends";
@@ -1043,7 +1051,7 @@ async function loadAttendance() {
     const timesBtn = document.createElement("button");
     timesBtn.className = "btn btn-sm btn-outline";
     timesBtn.textContent = "Edit times";
-    if (!opened) {
+    if (!started) {
       timesBtn.disabled = true;
       timesBtn.title = "The event has not started yet";
     }

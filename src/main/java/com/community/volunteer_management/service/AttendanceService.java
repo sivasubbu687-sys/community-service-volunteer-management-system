@@ -194,13 +194,12 @@ public class AttendanceService {
 		}
 	}
 
-	// Nothing can be recorded for an event that has not started (attendance opens 30 minutes before the start)
+	// Absence and time corrections are only possible once the event has started (check-in itself opens 30 minutes earlier)
 	private void checkEventStarted(Event event) {
-		LocalDateTime opens = LocalDateTime.of(event.getEventDate(), event.getStartTime())
-				.minusMinutes(EARLY_CHECK_IN_MINUTES);
-		if (LocalDateTime.now().isBefore(opens)) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This event has not started yet. Attendance opens on "
-					+ opens.toLocalDate() + " at " + opens.toLocalTime());
+		LocalDateTime start = LocalDateTime.of(event.getEventDate(), event.getStartTime());
+		if (LocalDateTime.now().isBefore(start)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This event has not started yet. It starts on "
+					+ start.toLocalDate() + " at " + start.toLocalTime());
 		}
 	}
 
