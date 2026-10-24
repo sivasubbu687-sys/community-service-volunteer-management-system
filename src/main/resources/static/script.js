@@ -902,12 +902,18 @@ function fmtDateTime(value) {
   return new Date(value).toLocaleString([], { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
-// True only on the event date, from its start time up to its end time
-function isEventWindowOpen(ev) {
+const EARLY_CHECK_IN_MINUTES = 30;   // same as the server
+
+// Attendance opens 30 minutes before the event starts; nothing can be recorded for a still-upcoming event
+function isAttendanceOpened(ev) {
   const start = new Date(ev.eventDate + "T" + ev.startTime);
+  return new Date() >= new Date(start.getTime() - EARLY_CHECK_IN_MINUTES * 60000);
+}
+
+// True from 30 minutes before the start until the event ends (live check-in / check-out)
+function isEventWindowOpen(ev) {
   const end = new Date(ev.eventDate + "T" + ev.endTime);
-  const now = new Date();
-  return now >= start && now <= end;
+  return isAttendanceOpened(ev) && new Date() <= end;
 }
 
 function fmtHours(h) {
@@ -962,10 +968,13 @@ async function loadAttendance() {
   badge.className = "badge badge-" + ev.status;
   badge.textContent = STATUS_LABELS[ev.status] || ev.status;
   const windowOpen = isEventWindowOpen(ev);
+  const opened = isAttendanceOpened(ev);
   const hint = document.createElement("span");
-  hint.textContent = windowOpen
-    ? "Check-in / check-out is open now."
-    : "Check-in / check-out is only available on " + ev.eventDate + " between " + shortTime(ev.startTime) + " and " + shortTime(ev.endTime) + ".";
+  hint.textContent = !opened
+    ? "This event has not started yet. Attendance opens on " + ev.eventDate + " " + EARLY_CHECK_IN_MINUTES + " minutes before it starts (" + shortTime(ev.startTime) + ")."
+    : windowOpen
+      ? "Check-in / check-out is open now."
+      : "Check-in / check-out is closed. You can still mark absence or correct times.";
   summary.append(makeEventThumb(ev.id, ev.title, "avatar-sm"), when, badge, hint);
   summary.classList.remove("hidden");
 
@@ -1017,9 +1026,12 @@ async function loadAttendance() {
       const btn = document.createElement("button");
       btn.className = "btn btn-sm " + cls;
       btn.textContent = text;
-      if (needsWindow && !windowOpen) {
+      if (!opened) {
         btn.disabled = true;
-        btn.title = "Only available on the event date, between start and end time";
+        btn.title = "The event has not started yet";
+      } else if (needsWindow && !windowOpen) {
+        btn.disabled = true;
+        btn.title = "Check-in / check-out is only open from " + EARLY_CHECK_IN_MINUTES + " minutes before the start until the event ends";
       }
       btn.addEventListener("click", () => attendanceAction(a, path, doneText));
       wrap.appendChild(btn);
@@ -1031,6 +1043,10 @@ async function loadAttendance() {
     const timesBtn = document.createElement("button");
     timesBtn.className = "btn btn-sm btn-outline";
     timesBtn.textContent = "Edit times";
+    if (!opened) {
+      timesBtn.disabled = true;
+      timesBtn.title = "The event has not started yet";
+    }
     timesBtn.addEventListener("click", () => askEditTimes(a));
     wrap.appendChild(timesBtn);
     actions.appendChild(wrap);

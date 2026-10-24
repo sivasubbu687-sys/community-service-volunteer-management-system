@@ -86,6 +86,7 @@ public class AttendanceService {
 	public AssignmentResponse correctTimes(Long id, AttendanceRequest request) {
 		Assignment assignment = findById(id);
 		checkAttendanceAllowed(assignment);
+		checkEventStarted(assignment.getEvent());
 		if (request == null || (request.checkInTime() == null && request.checkOutTime() == null)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provide checkInTime and/or checkOutTime");
 		}
@@ -118,6 +119,7 @@ public class AttendanceService {
 	public AssignmentResponse markAbsent(Long id) {
 		Assignment assignment = findById(id);
 		checkAttendanceAllowed(assignment);
+		checkEventStarted(assignment.getEvent());
 		if (assignment.getCheckInTime() != null) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT,
 					assignment.getVolunteer().getName() + " has already checked in, so cannot be marked absent");
@@ -189,6 +191,16 @@ public class AttendanceService {
 		if (assignment.getEvent().getStatus() == EventStatus.CANCELLED) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					"Event \"" + assignment.getEvent().getTitle() + "\" is CANCELLED");
+		}
+	}
+
+	// Nothing can be recorded for an event that has not started (attendance opens 30 minutes before the start)
+	private void checkEventStarted(Event event) {
+		LocalDateTime opens = LocalDateTime.of(event.getEventDate(), event.getStartTime())
+				.minusMinutes(EARLY_CHECK_IN_MINUTES);
+		if (LocalDateTime.now().isBefore(opens)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This event has not started yet. Attendance opens on "
+					+ opens.toLocalDate() + " at " + opens.toLocalTime());
 		}
 	}
 
