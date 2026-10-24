@@ -226,10 +226,15 @@
   }
 
   // ----- recent events table -----
+  let eventsAll = false;
   function renderRecentEvents() {
     const body = $("adm-recent-events");
     body.replaceChildren();
-    const recent = [...events].sort((a, b) => b.id - a.id).slice(0, 5);
+    const sorted = [...events].sort((a, b) => b.id - a.id);
+    const recent = sorted.slice(0, eventsAll ? sorted.length : 5);
+    $("adm-recent-wrap").classList.toggle("expanded", eventsAll);
+    $("adm-events-more").textContent = eventsAll ? "Show less" : "View All →";
+    $("adm-events-more").classList.toggle("hidden", sorted.length <= 5);
     $("adm-recent-empty").classList.toggle("hidden", recent.length > 0);
     recent.forEach((e) => {
       const tr = el("tr");
@@ -246,6 +251,8 @@
       body.appendChild(tr);
     });
   }
+
+  $("adm-events-more").addEventListener("click", () => { eventsAll = !eventsAll; renderRecentEvents(); });
 
   // ----- recent activities (built from what the system already records) -----
   let actAll = false;
