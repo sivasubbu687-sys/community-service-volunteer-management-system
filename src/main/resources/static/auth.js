@@ -14,9 +14,21 @@ function tokenIsValid(token) {
   }
 }
 
+// A saved token only counts if the server still accepts it; otherwise it is cleared and the login form stays
+// (checking only the expiry date opened the dashboard first and then bounced back to login)
 try {
-  if (tokenIsValid(localStorage.getItem(TOKEN_KEY))) {
-    location.replace("index.html");
+  const saved = localStorage.getItem(TOKEN_KEY);
+  if (tokenIsValid(saved)) {
+    fetch("/api/auth/me", { headers: { Authorization: "Bearer " + saved } })
+      .then((response) => {
+        if (response.ok) {
+          location.replace("index.html");
+        } else {
+          localStorage.removeItem(TOKEN_KEY);
+          localStorage.removeItem(USER_KEY);
+        }
+      })
+      .catch(() => { /* server unreachable: stay on the login page */ });
   }
 } catch (e) { /* storage unavailable: stay on the login page */ }
 
