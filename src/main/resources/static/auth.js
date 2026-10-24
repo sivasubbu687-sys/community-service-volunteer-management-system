@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const check = (finished) => {
     const value = input.value;
     let text = "";
-    if (value && !/^[6-9]/.test(value)) text = "Phone number must start with 6, 7, 8 or 9.";
+    if (value && !/^[6-9]/.test(value)) text = "Phone number should not start with " + value[0] + ". It should start with 6, 7, 8 or 9.";
     else if (finished && value && value.length !== 10) text = "Phone number must be exactly 10 digits.";
     if (text) showMessage(text, "error");
     else if ($("auth-message").textContent.startsWith("Phone number")) hideMessage();

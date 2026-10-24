@@ -329,7 +329,7 @@ Object.keys(fields).forEach((key) =>
 // A wrong first digit is flagged immediately; the length is flagged once the user leaves the field.
 function phoneProblem(value, finished) {
   if (!value) return finished ? "Phone number is required." : "";
-  if (!/^[6-9]/.test(value)) return "Phone number must start with 6, 7, 8 or 9.";
+  if (!/^[6-9]/.test(value)) return "Phone number should not start with " + value[0] + ". It should start with 6, 7, 8 or 9.";
   if (finished && value.length !== 10) return "Phone number must be exactly 10 digits.";
   return "";
 }
