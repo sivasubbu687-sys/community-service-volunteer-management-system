@@ -245,3 +245,6 @@ input[type=color] { width: 38px; height: 38px; padding: 2px; border: 1px solid #
 .report-option:has(input:checked) { border-color: #2F6FED; background: #EEF3FF; }
 .report-option span { display: flex; flex-direction: column; }
 .report-option small { color: #7B8AA0; }
+
+/* Recent Activities expanded by View All */
+.activity-list.expanded { max-height: 420px; overflow-y: auto; padding-right: 6px; }

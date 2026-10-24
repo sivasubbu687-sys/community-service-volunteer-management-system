@@ -248,6 +248,7 @@
   }
 
   // ----- recent activities (built from what the system already records) -----
+  let actAll = false;
   function renderActivities() {
     const items = [];
     assignments.forEach((a) => {
@@ -256,7 +257,8 @@
       if (a.checkOutTime) items.push({ time: a.checkOutTime, kind: "out", title: "Volunteer checked out", sub: a.volunteerName + " · " + a.eventTitle });
     });
     items.sort((x, y) => new Date(y.time) - new Date(x.time));
-    const shown = items.slice(0, 5);
+    const shown = items.slice(0, actAll ? items.length : 5);
+    const hasMore = items.length > 5;
     if (shown.length < 5 && volunteers.length) {
       const v = volunteers.reduce((a, b) => (b.id > a.id ? b : a));
       shown.push({ kind: "vol", title: "Latest volunteer registered", sub: v.name });
@@ -267,6 +269,9 @@
     }
 
     const list = $("adm-activities");
+    list.classList.toggle("expanded", actAll);
+    $("adm-act-more").textContent = actAll ? "Show less" : "View All →";
+    $("adm-act-more").classList.toggle("hidden", !hasMore);
     list.replaceChildren();
     $("adm-act-empty").classList.toggle("hidden", shown.length > 0);
     const colors = { asg: "c-purple", in: "c-green", out: "c-orange", vol: "c-blue", ev: "c-teal" };
@@ -349,6 +354,8 @@
   }
 
   $("adm-notif-more").addEventListener("click", () => { notifAll = !notifAll; renderNotifications(); });
+
+  $("adm-act-more").addEventListener("click", () => { actAll = !actAll; renderActivities(); });
 
   window.renderAdminDashboard = function () {
     renderStats();
