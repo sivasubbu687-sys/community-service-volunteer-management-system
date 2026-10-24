@@ -54,6 +54,7 @@ public class SecurityConfig {
 						// public API
 						.requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login",
 								"/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/health").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/auth/google/start", "/api/auth/google/callback").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
 						// Only ADMIN changes a password while logged in; everyone else uses the emailed reset link

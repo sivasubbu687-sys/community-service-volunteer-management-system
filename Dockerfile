@@ -7,4 +7,4 @@ RUN mvn package -DskipTests
 FROM eclipse-temurin:24-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-CMD ["sh", "-c", "java -Dserver.port=${PORT:-8080} -jar app.jar"]
+CMD ["sh", "-c", "java -XX:TieredStopAtLevel=1 -XX:+UseSerialGC -Xss512k -Xmx380m -Dserver.port=${PORT:-8080} -jar app.jar"]
